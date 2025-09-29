@@ -1,8 +1,8 @@
-%let pgm=utl-personal-altair-slc-convert-sas-datsstep-to-slc-sql-odbc-r-python;
+%let pgm=utl-personal-altair-slc-convert-sas-datastep-to-slc-sql-odbc-r-python;
 
 %stop_submission;
 
-Personal altair slc convert sas datsstep to slc sql odbc r python
+Personal altair slc convert sas datastep to slc sql odbc r python
 
 PROBLEM: select first occurance by sex where the age is 14
 
@@ -13,8 +13,8 @@ SOAPBOX OFF
 Too long to post to listserves, see githib
 
 github
-https://tinyurl.com/37n769tn
-https://github.com/rogerjdeangelis/utl-personal-altair-slc-convert-sas-datsstep-to-slc-sql-odbc-r-python
+https://tinyurl.com/ybm73xfe
+https://github.com/rogerjdeangelis/utl-personal-altair-slc-convert-sas-datastep-to-slc-sql-odbc-r-python
 
  The personal Altair slc supports ODBC without an access  product.
  I downloaded and installed the sqlite odbc driver, but using
@@ -439,3 +439,4 @@ NOTE: Procedure print step took :
  \___|_| |_|\__,_|
 
 */
+
