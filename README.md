@@ -1,10 +1,8 @@
-# utl-personal-altair-slc-convert-sas-datsstep-to-slc-sql-odbc-r-python
-Personal altair slc convert sas datsstep to slc sql odbc r python
-    %let pgm=utl-personal-altair-slc-convert-sas-datsstep-to-slc-sql-odbc-r-python;
+    %let pgm=utl-personal-altair-slc-convert-sas-datastep-to-slc-sql-odbc-r-python;
 
     %stop_submission;
 
-    Personal altair slc convert sas datsstep to slc sql odbc r python
+    Personal altair slc convert sas datastep to slc sql odbc r python
 
     PROBLEM: select first occurance by sex where the age is 14
 
@@ -15,8 +13,8 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
     Too long to post to listserves, see githib
 
     github
-    https://tinyurl.com/37n769tn
-    https://github.com/rogerjdeangelis/utl-personal-altair-slc-convert-sas-datsstep-to-slc-sql-odbc-r-python
+    https://tinyurl.com/ybm73xfe
+    https://github.com/rogerjdeangelis/utl-personal-altair-slc-convert-sas-datastep-to-slc-sql-odbc-r-python
 
      The personal Altair slc supports ODBC without an access  product.
      I downloaded and installed the sqlite odbc driver, but using
@@ -43,6 +41,12 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
        3 slc odbc fails (may be my problem)
        4 slc r sqlite
        5 slc python sqlite
+       6 sqlpartitionx macro
+          (Because I use monotonic use it only as is to sequence groups
+          or one overall sequence Do not make it a view or add any subqueies..
+          If you complicate the code beyond a simple sequencing, the
+          sas optimizer might reorder the groups for faster performance
+          and the patitioning will be out of order)
     /*                   _
     (_)_ __  _ __  _   _| |_
     | | `_ \| `_ \| | | | __|
@@ -93,6 +97,13 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
     Alfred     M      14
     James      U      14
 
+    /*___        _                                         _
+    |___ \   ___| | ___   _ __  _ __ ___   ___   ___  __ _| |
+      __) | / __| |/ __| | `_ \| `__/ _ \ / __| / __|/ _` | |
+     / __/  \__ \ | (__  | |_) | | | (_) | (__  \__ \ (_| | |
+    |_____| |___/_|\___| | .__/|_|  \___/ \___| |___/\__, |_|
+                         |_|                            |_|
+    */
 
     &_init_;
     proc sql;
@@ -110,6 +121,16 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
 
     proc print data=sexone;
     run;
+
+    OUTPUT
+    ======
+
+    Altair SLC
+
+    Obs     NAME     SEX    AGE
+
+     1     Alfred     M      14
+     2     James      U      14
 
     /*____       _                  _ _             __       _ _
     |___ /   ___| | ___    ___   __| | |__   ___   / _| __ _(_) |___
@@ -188,6 +209,16 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
 
     proc print data=want;
     run;quit;
+
+    OUTPUT
+    ======
+
+    Altair SLC
+
+        NAME SEX AGE
+    1 Alfred   M  14
+    2  James   U  14
+
 
     /*___        _                    _   _                            _ _ _
     | ___|   ___| | ___   _ __  _   _| |_| |__   ___  _ __   ___  __ _| (_) |_ ___
@@ -272,6 +303,18 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
     proc print data=work.rwant;
     run;quit;
 
+    OUTPUT
+    ======
+
+    Altair SLC
+
+    The PYTHON Procedure
+
+         NAME SEX   AGE
+    0  Alfred   M  14.0
+    1   James   U  14.0
+
+
     LOG
     ===
 
@@ -319,7 +362,7 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
 
     NOTE: Submitting statements to Python:
 
-    NOTE: <string>:16: SADeprecationWarning: The _ConnectionFairy.connection attribute is deprecated; please use 'driver_connection' (deprecated since:
+    NOTE: <string>:16: SADeprecationWarning: The _ConnectionFairy.connection attribute is deprecated; please use 'driver_connection' (deprecated since: 2.0)
 
 
     1094      run;quit;
@@ -434,6 +477,33 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
     1119      ODS _ALL_ CLOSE;
     1120      FILENAME WPSWBHTM CLEAR;
 
+    /*__              _                  _   _ _   _
+     / /_   ___  __ _| |_ __   __ _ _ __| |_(_) |_(_) ___  _ __ __  __
+    | `_ \ / __|/ _` | | `_ \ / _` | `__| __| | __| |/ _ \| `_ \\ \/ /
+    | (_) |\__ \ (_| | | |_) | (_| | |  | |_| | |_| | (_) | | | |>  <
+     \___/ |___/\__, |_| .__/ \__,_|_|   \__|_|\__|_|\___/|_| |_/_/\_\
+                   |_| |_|
+    */
+
+    %macro sqlpartitionx(dsn,by=team,minus=1)/
+       des="Improved sqlpartition that maintains data order";
+     ( select
+         *
+         ,max(seq) as seq
+       from
+         (select
+           *
+          ,seq-min(seq) + 1 as partition
+         from
+           (select *, &minus*monotonic() as seq from &dsn)
+         group
+           by &by )
+       group
+           by &by, seq
+       having
+           1=1)
+    %mend sqlpartitionx;
+
     /*              _
       ___ _ __   __| |
      / _ \ `_ \ / _` |
@@ -441,3 +511,4 @@ Personal altair slc convert sas datsstep to slc sql odbc r python
      \___|_| |_|\__,_|
 
     */
+
