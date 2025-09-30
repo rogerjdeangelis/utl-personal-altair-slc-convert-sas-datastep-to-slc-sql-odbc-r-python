@@ -41,6 +41,12 @@ CONTENTS
    3 slc odbc fails (may be my problem)
    4 slc r sqlite
    5 slc python sqlite
+   6 sqlpartitionx macro
+      (Because I use monotonic use it only as is to sequence groups
+      or one overall sequence Do not make it a view or add any subqueies..
+      If you complicate the code beyond a simple sequencing, the
+      sas optimizer might reorder the groups for faster performance
+      and the patitioning will be out of order)
 /*                   _
 (_)_ __  _ __  _   _| |_
 | | `_ \| `_ \| | | | __|
@@ -91,6 +97,13 @@ OUTPUT
 Alfred     M      14
 James      U      14
 
+/*___        _                                         _
+|___ \   ___| | ___   _ __  _ __ ___   ___   ___  __ _| |
+  __) | / __| |/ __| | `_ \| `__/ _ \ / __| / __|/ _` | |
+ / __/  \__ \ | (__  | |_) | | | (_) | (__  \__ \ (_| | |
+|_____| |___/_|\___| | .__/|_|  \___/ \___| |___/\__, |_|
+                     |_|                            |_|
+*/
 
 &_init_;
 proc sql;
@@ -108,6 +121,16 @@ proc sql;
 
 proc print data=sexone;
 run;
+
+OUTPUT
+======
+
+Altair SLC
+
+Obs     NAME     SEX    AGE
+
+ 1     Alfred     M      14
+ 2     James      U      14
 
 /*____       _                  _ _             __       _ _
 |___ /   ___| | ___    ___   __| | |__   ___   / _| __ _(_) |___
@@ -186,6 +209,16 @@ run;quit;
 
 proc print data=want;
 run;quit;
+
+OUTPUT
+======
+
+Altair SLC
+
+    NAME SEX AGE
+1 Alfred   M  14
+2  James   U  14
+
 
 /*___        _                    _   _                            _ _ _
 | ___|   ___| | ___   _ __  _   _| |_| |__   ___  _ __   ___  __ _| (_) |_ ___
@@ -269,6 +302,18 @@ options set=RHOME "D:\d451";
 
 proc print data=work.rwant;
 run;quit;
+
+OUTPUT
+======
+
+Altair SLC
+
+The PYTHON Procedure
+
+     NAME SEX   AGE
+0  Alfred   M  14.0
+1   James   U  14.0
+
 
 LOG
 ===
@@ -431,6 +476,33 @@ NOTE: Procedure print step took :
 1118      quit; run;
 1119      ODS _ALL_ CLOSE;
 1120      FILENAME WPSWBHTM CLEAR;
+
+/*__              _                  _   _ _   _
+ / /_   ___  __ _| |_ __   __ _ _ __| |_(_) |_(_) ___  _ __ __  __
+| `_ \ / __|/ _` | | `_ \ / _` | `__| __| | __| |/ _ \| `_ \\ \/ /
+| (_) |\__ \ (_| | | |_) | (_| | |  | |_| | |_| | (_) | | | |>  <
+ \___/ |___/\__, |_| .__/ \__,_|_|   \__|_|\__|_|\___/|_| |_/_/\_\
+               |_| |_|
+*/
+
+%macro sqlpartitionx(dsn,by=team,minus=1)/
+   des="Improved sqlpartition that maintains data order";
+ ( select
+     *
+     ,max(seq) as seq
+   from
+     (select
+       *
+      ,seq-min(seq) + 1 as partition
+     from
+       (select *, &minus*monotonic() as seq from &dsn)
+     group
+       by &by )
+   group
+       by &by, seq
+   having
+       1=1)
+%mend sqlpartitionx;
 
 /*              _
   ___ _ __   __| |
