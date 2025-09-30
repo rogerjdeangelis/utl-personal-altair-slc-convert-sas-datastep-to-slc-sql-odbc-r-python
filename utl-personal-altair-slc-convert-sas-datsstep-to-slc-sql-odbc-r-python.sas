@@ -2,12 +2,10 @@
 
 %stop_submission;
 
-Personal altair slc convert sas datastep to slc sql odbc r python
+Personal altair slc convert SAS DataStep to slc sql odbc r python
 
-PROBLEM: select first occurance by sex where the age is 14
-
-SOAPBOX OFF
-
+PROBLEM: select first occurrence by sex where the age is 14
+ 
  I am new to the personal Altair slc but there appears to be a problem with odbc sqlite?
 
 Too long to post to listserves, see githib
@@ -20,12 +18,7 @@ https://github.com/rogerjdeangelis/utl-personal-altair-slc-convert-sas-datastep-
  I downloaded and installed the sqlite odbc driver, but using
  that driver failed. I posted the problem, hopefully we will get an solution.
  Note, this may be my problem not Altairs.
-
-SOAPBOX OFF
-
-PROBLEM: select first occurance by sex when the age is 14
-
-
+ 
 github
 https://tinyurl.com/5au8cwpk
 https://github.com/rogerjdeangelis/utl-sqllite-odbc-driver-works-in-r-but-not-in-personal-altair-slc
