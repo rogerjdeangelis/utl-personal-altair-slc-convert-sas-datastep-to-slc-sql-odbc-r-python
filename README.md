@@ -2,11 +2,11 @@
 
     %stop_submission;
 
-    Personal altair slc convert sas datastep to slc sql odbc r python
+    Personal altair slc convert SAS DataStep to slc sql odbc r python
 
     PROBLEM: select first occurrence by sex where the age is 14
- 
-     I am new to the personal Altair slc, but there appears to be a problem with odbc sqlite?
+
+     I am new to the personal Altair slc but there appears to be a problem with odbc sqlite?
 
     Too long to post to listserves, see githib
 
@@ -16,9 +16,9 @@
 
      The personal Altair slc supports ODBC without an access  product.
      I downloaded and installed the sqlite odbc driver, but using
-     that driver failed. I posted the problem, hopefully we will get a solution.
+     that driver failed. I posted the problem, hopefully we will get an solution.
      Note, this may be my problem not Altairs.
-     
+
     github
     https://tinyurl.com/5au8cwpk
     https://github.com/rogerjdeangelis/utl-sqllite-odbc-driver-works-in-r-but-not-in-personal-altair-slc
@@ -31,7 +31,7 @@
 
        1 slc datstep
        2 slc proc sql
-       3 slc odbc fails (may be my problem)
+       3 slc odbc (works)
        4 slc r sqlite
        5 slc python sqlite
        6 sqlpartitionx macro
@@ -134,34 +134,36 @@
     */
 
     &_init_;
+    libname mydb odbc noprompt="Driver=SQLite3 ODBC Driver;Database=d:\sqlite\new.db;";
+
+    /*---- in case you rerun ----*/
     proc sql;
-      connect to odbc (dsn=sqlite3);
-      execute (
-        select
-           name
-          ,sex
-          ,age
-        from
-          (select
-             *
-            ,row_number() over (partition by sex) as partition
-          from
-             class )
-        whre
-           partition=1 and age=14
+      drop table mydb.class
+    ;quit;
 
+    data mydb.class;
+      set class;
+    run;quit;
 
-         ) by odbc;
-      disconnect from odbc;
-    quit;
+    proc print data=mydb.class;
+    run;quit;
+
+    libname mydb clear;
 
     OUTPUT
     ======
 
-    ERROR: A database error occurred. The database specific error follows:
-           DB: IM002: [Microsoft][ODBC Driver Manager] Data source name not found and no default driver specified
+    Obs    NAME        SEX         AGE
 
-    ERROR: Could not connect to DB
+     1     Barbara     F            13
+     2     Alice       F            13
+     3     Carol       F            14
+     4     Alfred      M            14
+     5     Henry       M            14
+     6     James       U            14
+     7     Ronald      U            15
+     8     Robert      U            12
+     9     Thomas      U            11
 
     /*  _         _                         _ _ _
     | || |    ___| | ___   _ __   ___  __ _| (_) |_ ___
